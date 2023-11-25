@@ -1,4 +1,4 @@
-use crate::solutions::Solutions;
+use crate::solutions::{Answers, Solutions};
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::iter;
@@ -8,7 +8,7 @@ use std::str::FromStr;
 pub struct Solutions2021;
 
 impl Solutions for Solutions2021 {
-    fn day11(input: Vec<String>) -> (String, Option<String>) {
+    fn day11(input: Vec<String>) -> Answers {
         fn step(input: &mut Vec<Vec<u32>>) -> usize {
             fn flash(input: &mut Vec<Vec<u32>>, row: usize, col: usize) -> usize {
                 dbg!((row, col));
@@ -81,7 +81,7 @@ impl Solutions for Solutions2021 {
         Self::part1(num_flashes)
     }
 
-    fn day12(input: Vec<String>) -> (String, Option<String>) {
+    fn day12(input: Vec<String>) -> Answers {
         type EdgeMap<'a> = HashMap<&'a str, Vec<&'a str>>;
 
         fn visit<'a>(current: &'a str, edges: &EdgeMap, mut visited: HashSet<&'a str>) -> usize {
@@ -142,7 +142,7 @@ impl Solutions for Solutions2021 {
         (part1, Some(part2))
     }
 
-    fn day13(input: Vec<String>) -> (String, Option<String>) {
+    fn day13(input: Vec<String>) -> Answers {
         fn fold_x(points: HashSet<(u32, u32)>, position: u32) -> HashSet<(u32, u32)> {
             points
                 .into_iter()
@@ -227,7 +227,7 @@ impl Solutions for Solutions2021 {
         Self::solutions(answer1, answer2)
     }
 
-    fn day14(input: Vec<String>) -> (String, Option<String>) {
+    fn day14(input: Vec<String>) -> Answers {
         type PatternMap = HashMap<(char, char), char>;
         type PairCounter = HashMap<(char, char), usize>;
 
@@ -287,7 +287,7 @@ impl Solutions for Solutions2021 {
         (answer.to_string(), Some(answer2.to_string()))
     }
 
-    fn day15(input: Vec<String>) -> (String, Option<String>) {
+    fn day15(input: Vec<String>) -> Answers {
         fn answer(input: &[String], reps: u32) -> u32 {
             let mut risk_lines = iter::repeat(input.iter())
                 .zip(0u32..)
@@ -332,7 +332,7 @@ impl Solutions for Solutions2021 {
         Self::solutions(answer(&input, 1), answer(&input, 5))
     }
 
-    fn day16(input: Vec<String>) -> (String, Option<String>) {
+    fn day16(input: Vec<String>) -> Answers {
         #[derive(Debug)]
         enum Packet {
             Literal {
@@ -456,7 +456,7 @@ impl Solutions for Solutions2021 {
         Self::solutions(add_version_numbers(&packet), eval(&packet))
     }
 
-    fn day17(input: Vec<String>) -> (String, Option<String>) {
+    fn day17(input: Vec<String>) -> Answers {
         fn is_target_reachable(
             pos: (isize, isize),
             velocity: (isize, isize),
@@ -514,36 +514,7 @@ impl Solutions for Solutions2021 {
         Self::solutions(max_y, num_hits)
     }
 
-    fn day18(input: Vec<String>) -> (String, Option<String>) {
-        enum SnailfishNum {
-            Value(u32),
-            Pair(Box<SnailfishNum>, Box<SnailfishNum>),
-        }
-
-        impl SnailfishNum {
-            fn parse(it: &mut impl Iterator<Item = char>) -> Self {
-                match it.next() {
-                    '[' => {
-                        let a = Box::new(parse(it));
-                        debug_assert!(it.next() == Some(',')); // skip comma
-                        let b = Box::new(parse(it));
-                        debug_assert!(it.next() == Some(']')); // skip closing paren
-                        SnailfishNum::Pair(a, b);
-                    }
-                    c => {
-                        let num = c.to_digit(10).expect("Was not numeric");
-                        SnailfishNum::Value(num);
-                    }
-                }
-            }
-        }
-
-        fn concat(self, other: Self) -> Self {
-            SnailfishNum::Pair(Box::new(self), Box::new(other))
-        }
-    }
-
-    fn day19(input: Vec<String>) -> (String, Option<String>) {
+    fn day19(input: Vec<String>) -> Answers {
         fn diff(
             (x1, y1, z1): (isize, isize, isize),
             (x2, y2, z2): (isize, isize, isize),
@@ -580,7 +551,7 @@ impl Solutions for Solutions2021 {
         Self::part1("")
     }
 
-    fn day20(input: Vec<String>) -> (String, Option<String>) {
+    fn day20(input: Vec<String>) -> Answers {
         fn _enhance(
             image: HashSet<(isize, isize)>,
             _algorithm: &[bool],
@@ -617,7 +588,7 @@ impl Solutions for Solutions2021 {
         Self::part1("")
     }
 
-    fn day21(input: Vec<String>) -> (String, Option<String>) {
+    fn day21(input: Vec<String>) -> Answers {
         #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
         struct Player {
             position: usize,
@@ -699,7 +670,7 @@ impl Solutions for Solutions2021 {
         Self::solutions(answer1, answer2)
     }
 
-    fn day22(input: Vec<String>) -> (String, Option<String>) {
+    fn day22(input: Vec<String>) -> Answers {
         #[derive(Debug, Default)]
         struct Cuboid {
             x1: isize,
@@ -816,7 +787,7 @@ impl Solutions for Solutions2021 {
         Self::solutions(answer1, answer2)
     }
 
-    fn day24(input: Vec<String>) -> (String, Option<String>) {
+    fn day24(input: Vec<String>) -> Answers {
         #[derive(Debug, Default)]
         struct Registers {
             w: i64,
@@ -915,7 +886,7 @@ impl Solutions for Solutions2021 {
         Self::part1(correct_inputs.next().unwrap())
     }
 
-    fn day25(input: Vec<String>) -> (String, Option<String>) {
+    fn day25(input: Vec<String>) -> Answers {
         fn step_east(region: &mut Vec<Vec<char>>) -> bool {
             let mut moved = false;
             for line in region.iter_mut() {

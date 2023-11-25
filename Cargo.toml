@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 reqwest = { version="*", features=["blocking"] }
 dotenv = "*"
+clap = { version = "4.0.29", features = ["derive"] }

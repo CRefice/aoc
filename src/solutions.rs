@@ -1,5 +1,7 @@
+pub type Answers = (String, Option<String>);
+
 pub trait Solutions {
-    fn run(day: usize, input: Vec<String>) -> (String, Option<String>) {
+    fn run(day: usize, input: Vec<String>) -> Answers {
         let days = [
             Self::day1,
             Self::day2,
@@ -30,87 +32,87 @@ pub trait Solutions {
         days.get(day - 1).expect("No problem for day")(input)
     }
 
-    fn part1<T: ToString>(solution: T) -> (String, Option<String>) {
+    fn part1<T: ToString>(solution: T) -> Answers {
         (solution.to_string(), None)
     }
 
-    fn solutions<T: ToString, U: ToString>(part1: T, part2: U) -> (String, Option<String>) {
+    fn solutions<T: ToString, U: ToString>(part1: T, part2: U) -> Answers {
         (part1.to_string(), Some(part2.to_string()))
     }
 
-    fn day1(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day1(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day2(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day2(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day3(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day3(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day4(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day4(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day5(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day5(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day6(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day6(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day7(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day7(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day8(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day8(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day9(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day9(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day10(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day10(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day11(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day11(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day12(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day12(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day13(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day13(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day14(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day14(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day15(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day15(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day16(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day16(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day17(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day17(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day18(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day18(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day19(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day19(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day20(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day20(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day21(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day21(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day22(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day22(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day23(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day23(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day24(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day24(_input: Vec<String>) -> Answers {
+        todo!()
     }
-    fn day25(_input: Vec<String>) -> (String, Option<String>) {
-        unimplemented!()
+    fn day25(_input: Vec<String>) -> Answers {
+        todo!()
     }
 }
