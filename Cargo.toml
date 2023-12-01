@@ -9,3 +9,4 @@ edition = "2021"
 reqwest = { version="*", features=["blocking"] }
 dotenv = "*"
 clap = { version = "4.0.29", features = ["derive"] }
+is-terminal = "0.4.9"

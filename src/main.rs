@@ -4,6 +4,7 @@ mod aoc2023;
 mod parse;
 mod solutions;
 
+use is_terminal::IsTerminal;
 use reqwest::header::COOKIE;
 use solutions::Solutions;
 use std::env;
@@ -65,8 +66,12 @@ fn main() {
     };
 
     let (part1, part2) = solution_fn(args.day, lines);
-    println!("Part 1: {}", part1);
-    if let Some(part2) = part2 {
-        println!("Part 2: {}", part2);
+    if std::io::stdout().is_terminal() {
+        println!("Part 1: {}", part1);
+        if let Some(part2) = part2 {
+            println!("Part 2: {}", part2);
+        }
+    } else {
+        print!("{}", part2.unwrap_or(part1));
     }
 }
