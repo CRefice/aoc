@@ -22,6 +22,15 @@ pub trait Parser<'a, Output> {
         })
     }
 
+    fn yielding<T>(self, value: T) -> BoxedParser<'a, T>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+        T: Clone + 'a,
+    {
+        self.map(move |_| value.clone())
+    }
+
     fn pair<Other, OtherOutput>(self, other: Other) -> BoxedParser<'a, (Output, OtherOutput)>
     where
         Self: Sized + 'a,
