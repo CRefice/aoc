@@ -1,14 +1,11 @@
-mod parse;
-mod solutions;
-mod util;
-
 mod aoc2021;
 mod aoc2022;
 mod aoc2023;
 
+use aoc::solutions::Solutions;
+
 use is_terminal::IsTerminal;
 use reqwest::header::COOKIE;
-use solutions::Solutions;
 use std::env;
 use std::io::{self, BufRead, BufReader};
 

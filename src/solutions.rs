@@ -29,7 +29,7 @@ pub trait Solutions {
             Self::day24,
             Self::day25,
         ];
-        days.get(day - 1).expect("No problem for day")(input)
+        days.get(day - 1).expect("No problem available for day")(input)
     }
 
     fn part1<T: ToString>(solution: T) -> Answers {

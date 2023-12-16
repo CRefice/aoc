@@ -191,7 +191,7 @@ where
     P: Parser<'a, Output> + 'a,
     Output: 'a,
 {
-    whitespace.right(parser).left(whitespace)
+    opt(whitespace).right(parser).left(opt(whitespace))
 }
 
 pub fn uint<'a, T: std::str::FromStr<Err = impl std::fmt::Debug> + 'a>(

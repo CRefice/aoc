@@ -1,4 +1,5 @@
-use crate::solutions::{Answers, Solutions};
+use aoc::solutions::{Answers, Solutions};
+
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::iter;
