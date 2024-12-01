@@ -194,6 +194,20 @@ where
     opt(whitespace).right(parser).left(opt(whitespace))
 }
 
+pub fn surround<'a, A, AOutput, B, BOutput, C, COutput>(
+    left: A,
+    p: B,
+    right: C,
+) -> impl Parser<'a, BOutput>
+where
+    A: Parser<'a, AOutput> + 'a,
+    B: Parser<'a, BOutput> + 'a,
+    C: Parser<'a, COutput> + 'a,
+    BOutput: 'a,
+{
+    left.right(p).left(right)
+}
+
 pub fn uint<'a, T: std::str::FromStr<Err = impl std::fmt::Debug> + 'a>(
     input: &'a str,
 ) -> ParseResult<T> {

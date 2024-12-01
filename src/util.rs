@@ -55,6 +55,31 @@ impl Map {
         let col = col.checked_add_signed(x).filter(|&col| col < self.width());
         row.and_then(|row| col.map(move |col| (row, col)))
     }
+
+    pub fn step_if(
+        &self,
+        pos: (usize, usize),
+        dir: (isize, isize),
+        pred: impl FnOnce(char) -> bool,
+    ) -> Option<(usize, usize)> {
+        self.step(pos, dir).filter(|&p| pred(self[p]))
+    }
+
+    pub fn step_wrapping(
+        &self,
+        (row, col): (usize, usize),
+        (y, x): (isize, isize),
+    ) -> (usize, usize) {
+        let row = (row + self.height()).checked_add_signed(y).unwrap() % self.height();
+        let col = (col + self.width()).checked_add_signed(x).unwrap() % self.width();
+        (row, col)
+    }
+
+    pub fn find(&self, target: char) -> Option<(usize, usize)> {
+        self.rows()
+            .enumerate()
+            .find_map(|(i, row)| row.iter().position(|&c| c == target).map(|j| (i, j)))
+    }
 }
 
 impl Display for Map {
