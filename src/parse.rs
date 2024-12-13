@@ -9,6 +9,24 @@ pub trait Parser<'a, Output> {
         self.pars(input).map(|pair| pair.0)
     }
 
+    fn first_match(&self, mut input: &'a str) -> Option<(Output, &'a str)> {
+        loop {
+            match self.pars(input) {
+                Ok(res) => return Some(res),
+                Err(rest) => {
+                    if rest.is_empty() {
+                        return None;
+                    }
+                    if rest.len() == input.len() {
+                        input = &rest[1..];
+                    } else {
+                        input = rest;
+                    }
+                }
+            }
+        }
+    }
+
     fn map<U, F>(self, map_fn: F) -> BoxedParser<'a, U>
     where
         Self: Sized + 'a,
@@ -69,10 +87,7 @@ pub trait Parser<'a, Output> {
         Self: Sized + 'a,
         Other: Parser<'a, OtherOutput> + 'a,
     {
-        Box::new(move |input: &'a str| {
-            self.pars(input)
-                .and_then(|(_, rest)| other.pars(rest).map(move |(result, rest)| (result, rest)))
-        })
+        Box::new(move |input: &'a str| self.pars(input).and_then(|(_, rest)| other.pars(rest)))
     }
 
     fn interspersed<Other, OtherOutput>(self, separator: Other) -> BoxedParser<'a, Vec<Output>>
@@ -233,6 +248,19 @@ pub fn int<
             }
         })
         .pars(input)
+}
+
+pub fn matches<'a, P, Output>(parser: &'a P, mut s: &'a str) -> impl Iterator<Item = Output> + 'a
+where
+    P: Parser<'a, Output> + 'a,
+    Output: 'a,
+{
+    std::iter::from_fn(move || {
+        parser.first_match(s).map(|(x, rest)| {
+            s = rest;
+            x
+        })
+    })
 }
 
 #[test]

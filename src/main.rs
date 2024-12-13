@@ -19,9 +19,6 @@ struct Args {
     #[arg(long, default_value_t = 2024)]
     year: u32,
 
-    #[arg(long)]
-    debug: bool,
-
     day: usize,
 }
 
@@ -38,7 +35,7 @@ fn main() {
         year => unimplemented!("No available solutions for {year}"),
     };
 
-    let lines: Vec<_> = if args.debug {
+    let lines: Vec<_> = if !std::io::stdin().is_terminal() {
         let stdin = io::stdin();
         let reader = BufReader::new(stdin.lock());
         reader
