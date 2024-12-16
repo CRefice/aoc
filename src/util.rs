@@ -46,6 +46,11 @@ impl Map {
             .collect())
     }
 
+    pub const UP: (isize, isize) = (-1, 0);
+    pub const DOWN: (isize, isize) = (1, 0);
+    pub const LEFT: (isize, isize) = (0, -1);
+    pub const RIGHT: (isize, isize) = (0, 1);
+
     pub fn step(
         &self,
         (row, col): (usize, usize),
@@ -153,6 +158,18 @@ where
         + std::ops::Div<Output = T>,
 {
     a * b / gcd(a, b)
+}
+
+pub fn num_digits<T>(mut a: T) -> u32
+where
+    T: PartialOrd + From<u8> + Copy + std::ops::Div<Output = T>,
+{
+    let mut result = 1;
+    while a > 9.into() {
+        result += 1;
+        a = a / 10.into();
+    }
+    result
 }
 
 use std::collections::HashMap;
