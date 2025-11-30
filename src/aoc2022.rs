@@ -1,5 +1,5 @@
 use aoc::parse::{self, Parser};
-use aoc::solutions::{Answers, Solutions};
+use aoc::solutions::Answers;
 
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
@@ -8,9 +8,9 @@ use std::collections::HashSet;
 use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 
-pub struct Solutions2022;
+pub struct Solutions;
 
-impl Solutions for Solutions2022 {
+impl aoc::solutions::Solutions for Solutions {
     fn day1(input: Vec<String>) -> Answers {
         let groups = input.split(String::is_empty);
         let total_calories =

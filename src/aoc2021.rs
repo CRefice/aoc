@@ -1,4 +1,4 @@
-use aoc::solutions::{Answers, Solutions};
+use aoc::solutions::{Answers};
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
@@ -6,9 +6,9 @@ use std::iter;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
-pub struct Solutions2021;
+pub struct Solutions;
 
-impl Solutions for Solutions2021 {
+impl aoc::solutions::Solutions for Solutions {
     fn day11(input: Vec<String>) -> Answers {
         fn step(input: &mut Vec<Vec<u32>>) -> usize {
             fn flash(input: &mut Vec<Vec<u32>>, row: usize, col: usize) -> usize {

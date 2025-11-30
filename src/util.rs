@@ -10,22 +10,20 @@ impl Map {
 
     pub fn rows(
         &self,
-    ) -> impl Iterator<Item = &[char]> + std::iter::DoubleEndedIterator + std::iter::ExactSizeIterator
-    {
+    ) -> impl std::iter::DoubleEndedIterator<Item = &[char]> + std::iter::ExactSizeIterator {
         self.0.iter().map(|row| row.as_slice())
     }
 
     pub fn rows_mut(
         &mut self,
-    ) -> impl Iterator<Item = &mut [char]> + std::iter::DoubleEndedIterator + std::iter::ExactSizeIterator
+    ) -> impl std::iter::DoubleEndedIterator<Item = &mut [char]> + std::iter::ExactSizeIterator
     {
         self.0.iter_mut().map(|row| row.as_mut_slice())
     }
 
     pub fn columns(
         &self,
-    ) -> impl Iterator<Item = impl Iterator<Item = &char>>
-           + std::iter::DoubleEndedIterator
+    ) -> impl std::iter::DoubleEndedIterator<Item = impl Iterator<Item = &char>>
            + std::iter::ExactSizeIterator {
         let width = self.width();
         let height = self.height();
@@ -224,6 +222,15 @@ pub struct OrderedMap<K, V> {
     last: Option<usize>,
 }
 
+impl<K, V> Default for OrderedMap<K, V>
+where
+    K: Hash + Eq,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<K, V> OrderedMap<K, V>
 where
     K: Hash + Eq,
@@ -302,10 +309,7 @@ where
         K: std::borrow::Borrow<Q>,
         Q: Hash + Eq + ?Sized,
     {
-        let Some(idx) = self.map.remove(key) else {
-            return None;
-        };
-
+        let idx = self.map.remove(key)?;
         let Node { prev, next, .. } = self.nodes[idx];
         if let Some(prev) = prev {
             self.nodes[prev].next = next;

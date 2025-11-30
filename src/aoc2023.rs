@@ -1,14 +1,14 @@
 use aoc::parse::{self, Parser};
-use aoc::solutions::{Answers, Solutions};
+use aoc::solutions::Answers;
 use aoc::util::*;
 
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::iter;
 
-pub struct Solutions2023;
+pub struct Solutions;
 
-impl Solutions for Solutions2023 {
+impl aoc::solutions::Solutions for Solutions {
     fn day1(input: Vec<String>) -> Answers {
         let part1 = input.iter().map(|line| {
             let mut digits = line.chars().filter_map(|c| c.to_digit(10));

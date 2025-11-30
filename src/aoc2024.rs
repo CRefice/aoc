@@ -1,14 +1,14 @@
 use aoc::parse::{self, Parser};
-use aoc::solutions::{Answers, Solutions};
+use aoc::solutions::Answers;
 use aoc::util::*;
 
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::iter;
 
-pub struct Solutions2024;
+pub struct Solutions;
 
-impl Solutions for Solutions2024 {
+impl aoc::solutions::Solutions for Solutions {
     fn day1(input: Vec<String>) -> Answers {
         let parser = parse::uint::<u32>.pair(parse::whitespace.right(parse::uint::<u32>));
         let (mut left, mut right): (Vec<u32>, Vec<u32>) = input

@@ -2,6 +2,7 @@ mod aoc2021;
 mod aoc2022;
 mod aoc2023;
 mod aoc2024;
+mod aoc2025;
 
 use aoc::solutions::Solutions;
 
@@ -16,9 +17,8 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(long, default_value_t = 2024)]
+    #[arg(long, default_value_t = 2025)]
     year: u32,
-
     day: usize,
 }
 
@@ -28,10 +28,11 @@ fn main() {
     let args = Args::parse();
 
     let solution_fn = match args.year {
-        2021 => aoc2021::Solutions2021::run,
-        2022 => aoc2022::Solutions2022::run,
-        2023 => aoc2023::Solutions2023::run,
-        2024 => aoc2024::Solutions2024::run,
+        2021 => aoc2021::Solutions::run,
+        2022 => aoc2022::Solutions::run,
+        2023 => aoc2023::Solutions::run,
+        2024 => aoc2024::Solutions::run,
+        2025 => aoc2025::Solutions::run,
         year => unimplemented!("No available solutions for {year}"),
     };
 

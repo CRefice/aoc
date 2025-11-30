@@ -149,7 +149,7 @@ where
     }
 }
 
-pub fn any_char(input: &str) -> ParseResult<char> {
+pub fn any_char(input: &str) -> ParseResult<'_, char> {
     let mut chars = input.chars();
     let c = chars.next().ok_or(input)?;
     Ok((c, chars.as_str()))
@@ -193,11 +193,11 @@ where
     }
 }
 
-pub fn whitespace(input: &str) -> ParseResult<()> {
+pub fn whitespace(input: &str) -> ParseResult<'_, ()> {
     predicate(char::is_whitespace).map(|_| ()).pars(input)
 }
 
-pub fn word(input: &str) -> ParseResult<&str> {
+pub fn word(input: &str) -> ParseResult<'_, &str> {
     predicate(char::is_alphabetic).pars(input)
 }
 
@@ -225,7 +225,7 @@ where
 
 pub fn uint<'a, T: std::str::FromStr<Err = impl std::fmt::Debug> + 'a>(
     input: &'a str,
-) -> ParseResult<T> {
+) -> ParseResult<'a, T> {
     predicate(char::is_numeric)
         .map(|s| s.parse::<T>().unwrap())
         .pars(input)
@@ -236,7 +236,7 @@ pub fn int<
     T: std::str::FromStr<Err = impl std::fmt::Debug> + std::ops::Neg<Output = T> + 'a,
 >(
     input: &'a str,
-) -> ParseResult<T> {
+) -> ParseResult<'a, T> {
     opt('-')
         .pair(predicate(char::is_numeric))
         .map(|(sign, s)| {
