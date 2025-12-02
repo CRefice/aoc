@@ -47,4 +47,86 @@ impl aoc::solutions::Solutions for Solutions {
         }
         Self::solutions(part1, part2)
     }
+
+    fn day2(input: Vec<String>) -> Answers {
+        /// Returns true iff num consists of two repeated numbers
+        fn is_invalid_part1(num: u64) -> bool {
+            let digits = num.to_string();
+            let (a, b) = digits.split_at(digits.len() / 2);
+            a == b
+        }
+
+        /// Returns true iff num consists of at least two repeated numbers
+        fn is_invalid_part2(num: u64) -> bool {
+            let digits: Vec<char> = num.to_string().chars().collect();
+
+            for length in 1..=(digits.len() / 2) {
+                let part = &digits[..length];
+                if digits.chunks(length).all(|chunk| chunk == part) {
+                    return true;
+                }
+            }
+            false
+        }
+
+        let ranges: Vec<(u64, u64)> = parse::uint::<u64>
+            .pair('-'.right(parse::uint::<u64>))
+            .interspersed(',')
+            .parse_exact(&input[0])
+            .unwrap();
+
+        let mut part1 = 0;
+        let mut part2 = 0;
+        for (start, end) in ranges {
+            for x in start..=end {
+                if is_invalid_part1(x) {
+                    part1 += x;
+                }
+                if is_invalid_part2(x) {
+                    part2 += x;
+                }
+            }
+        }
+        Self::solutions(part1, part2)
+    }
+
+    fn day3(input: Vec<String>) -> Answers {
+        fn join_digits(it: impl IntoIterator<Item = u32>) -> u64 {
+            it.into_iter().fold(0, |acc, x| acc * 10 + x as u64)
+        }
+
+        fn max_n(arr: &[u32], n: usize) -> Vec<u32> {
+            let mut maximums = arr[..n].to_vec();
+            for &x in &arr[n..] {
+                maximums.push(x);
+                // Try to "bump" at most one element up
+                for i in 1..maximums.len() {
+                    if maximums[i] > maximums[i - 1] {
+                        maximums[i - 1..].rotate_left(1);
+                        break;
+                    }
+                }
+                maximums.pop();
+            }
+            maximums
+        }
+
+        let bank_parser = parse::zero_or_more(parse::any_char.map(|c| c.to_digit(10).unwrap()));
+        let banks: Vec<Vec<u32>> = input
+            .iter()
+            .map(|s| bank_parser.parse_exact(s).unwrap())
+            .collect();
+
+        let part1 = banks
+            .iter()
+            .map(|bank| join_digits(max_n(bank, 2)))
+            .sum::<u64>();
+
+        let part2 = banks
+            .iter()
+            .map(|bank| join_digits(max_n(bank, 12)))
+            .sum::<u64>();
+
+        Self::solutions(part1, part2)
+    }
 }
