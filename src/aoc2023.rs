@@ -625,7 +625,7 @@ impl aoc::solutions::Solutions for Solutions {
             .rows()
             .enumerate()
             .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, c)| ((i, j), c)))
-            .find(|((_i, _j), &c)| c == 'S')
+            .find(|((_i, _j), c)| **c == 'S')
             .map(|pair| pair.0)
             .unwrap();
 

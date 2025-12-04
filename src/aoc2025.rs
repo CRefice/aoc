@@ -129,4 +129,42 @@ impl aoc::solutions::Solutions for Solutions {
 
         Self::solutions(part1, part2)
     }
+
+    fn day4(input: Vec<String>) -> Answers {
+        fn is_accessible(pos: (usize, usize), map: &Map) -> bool {
+            map.neighbors(pos).filter(|&pos| map[pos] == '@').count() < 4
+        }
+
+        let map = Map::from(&input);
+
+        let mut part1 = 0;
+        for (i, row) in map.rows().enumerate() {
+            for (j, cell) in row.iter().copied().enumerate() {
+                if cell == '@' && is_accessible((i, j), &map) {
+                    part1 += 1;
+                }
+            }
+        }
+
+        let mut map = map;
+        let mut part2 = 0;
+        loop {
+            let mut removed: HashSet<(usize, usize)> = HashSet::new();
+            for (i, row) in map.rows().enumerate() {
+                for (j, cell) in row.iter().copied().enumerate() {
+                    if cell == '@' && is_accessible((i, j), &map) {
+                        removed.insert((i, j));
+                    }
+                }
+            }
+            if removed.is_empty() {
+                break;
+            }
+            part2 += removed.len();
+            for pos in removed {
+                map[pos] = '.';
+            }
+        }
+        Self::solutions(part1, part2)
+    }
 }

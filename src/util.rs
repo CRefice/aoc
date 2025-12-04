@@ -24,7 +24,7 @@ impl Map {
     pub fn columns(
         &self,
     ) -> impl std::iter::DoubleEndedIterator<Item = impl Iterator<Item = &char>>
-           + std::iter::ExactSizeIterator {
+    + std::iter::ExactSizeIterator {
         let width = self.width();
         let height = self.height();
         (0..width).map(move |col| (0..height).map(move |row| &self.0[row][col]))
@@ -82,6 +82,27 @@ impl Map {
         self.rows()
             .enumerate()
             .find_map(|(i, row)| row.iter().position(|&c| c == target).map(|j| (i, j)))
+    }
+
+    /// Neighbors of the given cell, including diagonals.
+    pub fn neighbors(&self, pos: (usize, usize)) -> impl Iterator<Item = (usize, usize)> + '_ {
+        let deltas = [-1, 0, 1]
+            .into_iter()
+            .flat_map(|di| [-1, 0, 1].into_iter().map(move |dj| (di, dj)))
+            .filter(|&(di, dj)| !(di == 0 && dj == 0));
+
+        deltas.filter_map(move |step| self.step(pos, step))
+    }
+
+    /// Neighbors of the given cell, excluding diagonals.
+    pub fn direct_neighbors(
+        &self,
+        pos: (usize, usize),
+    ) -> impl Iterator<Item = (usize, usize)> + '_ {
+        let deltas = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+        deltas
+            .into_iter()
+            .filter_map(move |step| self.step(pos, step))
     }
 }
 
