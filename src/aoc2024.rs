@@ -440,78 +440,139 @@ impl aoc::solutions::Solutions for Solutions {
     }
 
     fn day10(input: Vec<String>) -> Answers {
-        fn trailhead_score(pos: (usize, usize), map: &mut Map) -> usize {
-            let c = map[pos];
+        fn trailhead_score(
+            pos: (usize, usize),
+            map: &Map,
+            visited: &mut HashSet<(usize, usize)>,
+        ) -> usize {
+            if !visited.insert(pos) {
+                return 0;
+            }
             let x = map[pos].to_digit(10).unwrap();
             if x == 9 {
                 return 1;
             }
             let mut count = 0;
-            map[pos] = '.';
             for dir in [Map::UP, Map::LEFT, Map::RIGHT, Map::DOWN] {
                 if let Some(p) =
                     map.step_if(pos, dir, |y| y.to_digit(10).is_some_and(|y| y == x + 1))
                 {
-                    count += trailhead_score(p, map)
+                    count += trailhead_score(p, map, visited)
                 }
             }
-            map[pos] = c;
             count
         }
 
-        let mut map = Map::from(&input);
-        let mut count = 0;
+        fn trailhead_rating(pos: (usize, usize), map: &Map) -> usize {
+            let x = map[pos].to_digit(10).unwrap();
+            if x == 9 {
+                return 1;
+            }
+            let mut count = 0;
+            for dir in [Map::UP, Map::LEFT, Map::RIGHT, Map::DOWN] {
+                if let Some(p) =
+                    map.step_if(pos, dir, |y| y.to_digit(10).is_some_and(|y| y == x + 1))
+                {
+                    count += trailhead_rating(p, map)
+                }
+            }
+            count
+        }
+
+        let map = Map::from(&input);
+        let mut part1 = 0;
+        let mut part2 = 0;
         for i in 0..map.height() {
             for j in 0..map.width() {
                 if map[(i, j)] == '0' {
-                    count += trailhead_score((i, j), &mut map);
+                    let mut set = HashSet::new();
+                    part1 += trailhead_score((i, j), &map, &mut set);
+                    part2 += trailhead_rating((i, j), &map);
                 }
             }
         }
-        Self::part1(count)
+        Self::solutions(part1, part2)
     }
 
     fn day11(input: Vec<String>) -> Answers {
         let line = input.into_iter().next().unwrap();
-        let mut stones = parse::uint::<u64>
+        let stones = parse::uint::<u64>
             .interspersed(parse::whitespace)
             .parse_exact(&line)
             .unwrap();
 
-        fn blink(stones: &mut Vec<u64>) {
-            for x in std::mem::take(stones) {
-                if x == 0 {
-                    stones.push(1);
-                    continue;
-                }
-                let digits = num_digits(x);
-                if digits % 2 == 0 {
-                    let mask = 10_u64.pow(digits / 2);
-                    stones.push(x / mask);
-                    stones.push(x % mask);
-                } else {
-                    stones.push(x * 2024);
-                }
+        fn stones_after_blinking(
+            num: u64,
+            blinks: usize,
+            memo: &mut HashMap<(u64, usize), usize>,
+        ) -> usize {
+            if let Some(answer) = memo.get(&(num, blinks)) {
+                return *answer;
             }
+            let answer = if blinks == 0 {
+                1
+            } else if num == 0 {
+                stones_after_blinking(1, blinks - 1, memo)
+            } else {
+                let num_digits = num.ilog10() + 1;
+                if num_digits.is_multiple_of(2) {
+                    let mask = 10u64.pow(num_digits / 2);
+                    let left = num / mask;
+                    let right = num % mask;
+                    stones_after_blinking(left, blinks - 1, memo)
+                        + stones_after_blinking(right, blinks - 1, memo)
+                } else {
+                    stones_after_blinking(num * 2024, blinks - 1, memo)
+                }
+            };
+            memo.insert((num, blinks), answer);
+            answer
         }
 
-        for _ in 0..25 {
-            blink(&mut stones);
+        let mut part1 = 0;
+        let mut part2 = 0;
+        let mut memo = HashMap::new();
+        for stone in stones {
+            part2 += stones_after_blinking(stone, 75, &mut memo);
+            part1 += stones_after_blinking(stone, 25, &mut memo);
         }
-
-        let part1 = stones.len();
-
-        for _i in 25..75 {
-            blink(&mut stones);
-            dbg!(_i, stones.len());
-        }
-
-        let part2 = stones.len();
         Self::solutions(part1, part2)
     }
 
     fn day12(input: Vec<String>) -> Answers {
-        unimplemented!()
+        fn area_and_perimeter(
+            pos: (usize, usize),
+            map: &Map,
+            visited: &mut HashSet<(usize, usize)>,
+        ) -> (usize, usize) {
+            if !visited.insert(pos) {
+                return (0, 0);
+            }
+            let c = map[pos];
+            let mut area = 1;
+            let mut perimeter = 4;
+            for neigh in map.direct_neighbors(pos) {
+                if map[neigh] == c {
+                    let (na, np) = area_and_perimeter(neigh, map, visited);
+                    area += na;
+                    // Subtract 1 because this edge is not part of the perimeter anymore
+                    perimeter -= 1;
+                    perimeter += np;
+                }
+            }
+            (area, perimeter)
+        }
+
+        let map = Map::from(&input);
+        let mut part1 = 0;
+        let mut visited = HashSet::new();
+        for (i, row) in map.rows().enumerate() {
+            for (j, c) in row.iter().enumerate() {
+                let (area, perimeter) = area_and_perimeter((i, j), &map, &mut visited);
+                part1 += area * perimeter;
+            }
+        }
+        Self::part1(part1)
     }
 
     fn day13(input: Vec<String>) -> Answers {
