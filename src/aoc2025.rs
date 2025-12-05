@@ -167,4 +167,68 @@ impl aoc::solutions::Solutions for Solutions {
         }
         Self::solutions(part1, part2)
     }
+
+    fn day5(input: Vec<String>) -> Answers {
+        let mut chunks = input.split(String::is_empty);
+        let ranges = chunks.next().unwrap();
+        let ingredients = chunks.next().unwrap();
+
+        let ranges = ranges
+            .iter()
+            .map(|line| {
+                parse::uint::<u64>
+                    .pair('-'.right(parse::uint::<u64>))
+                    .parse_exact(line)
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
+
+        let ingredients = ingredients
+            .iter()
+            .map(|line| parse::uint::<u64>.parse_exact(line).unwrap());
+
+        let part1 = ingredients
+            .filter(|x| ranges.iter().any(|(a, b)| a <= x && x <= b))
+            .count();
+
+        #[derive(PartialOrd, Ord, PartialEq, Eq, Debug)]
+        struct Boundary {
+            x: u64,
+            is_end: bool,
+        }
+
+        let mut boundaries: Vec<Boundary> = ranges
+            .into_iter()
+            .flat_map(|(a, b)| {
+                [
+                    Boundary {
+                        x: a,
+                        is_end: false,
+                    },
+                    Boundary { x: b, is_end: true },
+                ]
+            })
+            .collect();
+        boundaries.sort_unstable();
+
+        let mut part2 = 0;
+        let mut active = 0;
+        let mut last_start = 0;
+        dbg!(&boundaries);
+        for Boundary { x, is_end } in boundaries {
+            if !is_end {
+                if active == 0 {
+                    last_start = x;
+                }
+                active += 1;
+            } else {
+                active -= 1;
+                if active == 0 {
+                    part2 += x - last_start + 1;
+                }
+            }
+        }
+
+        Self::solutions(part1, part2)
+    }
 }
