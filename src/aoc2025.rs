@@ -231,4 +231,85 @@ impl aoc::solutions::Solutions for Solutions {
 
         Self::solutions(part1, part2)
     }
+
+    fn day10(input: Vec<String>) -> Answers {
+        let indicators = parse::surround(
+            '[',
+            parse::zero_or_more('.'.or('#').map(|x| x == '#')).map(|positions| {
+                positions
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, enabled)| (enabled as u64) << (i as u64))
+                    .reduce(|x, y| x | y)
+                    .unwrap()
+            }),
+            ']',
+        );
+
+        let buttons = parse::surround(
+            '(',
+            parse::uint::<u64>.interspersed(',').map(|x| {
+                x.into_iter()
+                    .map(|x| 1u64 << x)
+                    .reduce(|x, y| x | y)
+                    .unwrap()
+            }),
+            ')',
+        )
+        .interspersed(parse::whitespace);
+
+        let parser = indicators.pair(parse::whitespace.right(buttons));
+
+        fn min_presses(
+            state: u64,
+            target: u64,
+            buttons: &[u64],
+            pressed: &mut HashSet<u64>,
+            memo: &mut HashMap<u64, usize>,
+        ) -> Option<usize> {
+            if state == target {
+                return Some(0);
+            } else if buttons.is_empty() {
+                return None;
+            }
+            if let Some(answer) = memo.get(&state) {
+                return Some(*answer);
+            }
+            let answer = buttons
+                .iter()
+                .copied()
+                .filter_map(|button| {
+                    if !pressed.insert(button) {
+                        return None;
+                    }
+                    let state = state ^ button;
+                    let answer = min_presses(state, target, buttons, pressed, memo);
+                    pressed.remove(&button);
+                    answer
+                })
+                .min()?
+                .saturating_add(1);
+            memo.insert(state, answer);
+            eprintln!("{state} -> [{pressed:?}] = {answer:?}");
+            Some(answer)
+        }
+
+        let mut total = 0;
+        for line in input.iter() {
+            let mut memo = HashMap::new();
+            let (indicators, buttons) = parser.pars(line).unwrap().0;
+
+            dbg!(&buttons);
+            total += dbg!(min_presses(
+                0,
+                indicators,
+                &buttons,
+                &mut HashSet::new(),
+                &mut memo
+            ))
+            .unwrap();
+        }
+
+        Self::part1(total)
+    }
 }

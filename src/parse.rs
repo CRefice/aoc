@@ -104,7 +104,9 @@ pub trait Parser<'a, Output> {
                             results.push(result);
                             rest = rem;
                         }
-                        Err(_) => return Err(input),
+                        Err(_) => {
+                            break;
+                        }
                     }
                 }
                 Ok((results, rest))
@@ -241,11 +243,7 @@ pub fn int<
         .pair(predicate(char::is_numeric))
         .map(|(sign, s)| {
             let num = s.parse::<T>().unwrap();
-            if let Some('-') = sign {
-                -num
-            } else {
-                num
-            }
+            if let Some('-') = sign { -num } else { num }
         })
         .pars(input)
 }
