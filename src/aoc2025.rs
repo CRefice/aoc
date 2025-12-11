@@ -232,6 +232,236 @@ impl aoc::solutions::Solutions for Solutions {
         Self::solutions(part1, part2)
     }
 
+    fn day6(input: Vec<String>) -> Answers {
+        enum Op {
+            Mul,
+            Add,
+        }
+
+        impl Op {
+            fn parse(s: &str) -> Self {
+                match s {
+                    "*" => Self::Mul,
+                    "+" => Self::Add,
+                    x => unreachable!("unexpected operation: {}", x),
+                }
+            }
+
+            fn apply(&self, x: u64, y: u64) -> u64 {
+                match self {
+                    Op::Mul => x * y,
+                    Op::Add => x + y,
+                }
+            }
+        }
+
+        fn reduce_all(inputs: impl Iterator<Item = Vec<u64>>, ops: &[Op]) -> Vec<u64> {
+            inputs
+                .reduce(|mut x: Vec<u64>, y| {
+                    for ((x, y), op) in x.iter_mut().zip(y).zip(ops.iter()) {
+                        *x = op.apply(*x, y);
+                    }
+                    x
+                })
+                .unwrap()
+        }
+
+        let (ops, input) = input.split_last().unwrap();
+        let ops = ops.split_whitespace().map(Op::parse).collect::<Vec<_>>();
+        let input = input.iter().map(|line| {
+            line.split_whitespace()
+                .map(|s| s.parse::<u64>().unwrap())
+                .collect()
+        });
+
+        let part1 = reduce_all(input, &ops).into_iter().sum::<u64>();
+
+        Self::part1(part1)
+        // let part2 = reduce_all(part2_input, &ops).into_iter().sum::<u64>();
+
+        // Self::solutions(part1, part2)
+    }
+
+    fn day7(input: Vec<String>) -> Answers {
+        let map = Map::from(&input);
+
+        fn beam_splits(map: &Map) -> usize {
+            let start = map.find('S').unwrap();
+
+            let mut set = HashSet::from_iter([start]);
+
+            let mut splits = 0;
+            while !set.is_empty() {
+                dbg!(set.len());
+                let mut new_set = HashSet::new();
+                for pos in set.into_iter() {
+                    let Some(next) = map.step(pos, Map::DOWN) else {
+                        continue;
+                    };
+                    if map[next] == '^' {
+                        map.step(next, Map::LEFT).map(|x| new_set.insert(x));
+                        map.step(next, Map::RIGHT).map(|x| new_set.insert(x));
+                        splits += 1;
+                    } else {
+                        new_set.insert(next);
+                    }
+                }
+                set = new_set;
+            }
+            splits
+        }
+
+        fn num_paths(map: &Map) -> usize {
+            let mut paths = vec![0; map.width()];
+            for row in map.rows() {
+                dbg!(&paths);
+                for (i, c) in row.iter().enumerate() {
+                    match c {
+                        'S' => paths[i] = 1,
+                        '^' => {
+                            paths[i - 1] += paths[i];
+                            paths[i + 1] += paths[i];
+                            paths[i] = 0;
+                        }
+                        _ => (),
+                    }
+                }
+            }
+            paths.into_iter().sum()
+        }
+
+        Self::solutions(beam_splits(&map), num_paths(&map))
+    }
+
+    fn day8(input: Vec<String>) -> Answers {
+        struct UnionFind {
+            ids: Vec<usize>,
+            sizes: Vec<usize>,
+        }
+        impl UnionFind {
+            fn new(size: usize) -> Self {
+                Self {
+                    ids: (0..size).collect(),
+                    sizes: vec![1; size],
+                }
+            }
+
+            fn union(&mut self, a: usize, b: usize) {
+                let mut a = self.find_compress(a);
+                let mut b = self.find_compress(b);
+
+                if a == b {
+                    return;
+                }
+                if self.sizes[a] < self.sizes[b] {
+                    (b, a) = (a, b)
+                }
+                self.ids[b] = a;
+                self.sizes[a] += self.sizes[b];
+            }
+
+            fn find(&self, a: usize) -> usize {
+                let mut root = a;
+                while self.ids[root] != root {
+                    root = self.ids[root];
+                }
+                root
+            }
+
+            fn find_compress(&mut self, a: usize) -> usize {
+                let mut root = a;
+                while self.ids[root] != root {
+                    root = self.ids[root];
+                }
+                let mut a = a;
+                while self.ids[a] != a {
+                    let next = self.ids[a];
+                    self.ids[a] = root;
+                    a = next;
+                }
+                root
+            }
+
+            fn group_sizes(&self) -> HashMap<usize, usize> {
+                let mut sizes = HashMap::new();
+                for x in 0..(self.ids.len()) {
+                    *sizes.entry(self.find(x)).or_default() += 1;
+                }
+                sizes
+            }
+        }
+
+        fn dot(a: (u64, u64, u64), b: (u64, u64, u64)) -> u64 {
+            let d0 = a.0.abs_diff(b.0);
+            let d1 = a.1.abs_diff(b.1);
+            let d2 = a.2.abs_diff(b.2);
+            d0 * d0 + d1 * d1 + d2 * d2
+        }
+
+        let boxes: Vec<(u64, u64, u64)> = input
+            .iter()
+            .map(|line| {
+                let parts = parse::uint::<u64>
+                    .interspersed(',')
+                    .parse_exact(line)
+                    .unwrap();
+                (parts[0], parts[1], parts[2])
+            })
+            .collect();
+
+        let mut pairs = (0..boxes.len())
+            .flat_map(|i| ((i + 1)..boxes.len()).map(move |j| (i, j)))
+            .collect::<Vec<_>>();
+
+        pairs.sort_unstable_by_key(|&(i, j)| dot(boxes[i], boxes[j]));
+
+        let mut uf = UnionFind::new(boxes.len());
+        let mut last_pair = (0, 0);
+        for &(i, j) in &pairs[..(1000.min(pairs.len()))] {
+            uf.union(i, j);
+            last_pair = (i, j);
+        }
+
+        let mut part1 = uf.group_sizes().values().copied().collect::<Vec<_>>();
+        part1.sort_unstable_by_key(|&x| std::cmp::Reverse(x));
+        let part1 = part1[0] * part1[1] * part1[2];
+
+        for &(i, j) in &pairs[(1000.min(pairs.len()))..] {
+            uf.union(i, j);
+            last_pair = (i, j);
+            if uf.group_sizes().len() == 1 {
+                break;
+            }
+        }
+
+        let part2 = boxes[last_pair.0].0 * boxes[last_pair.1].0;
+        Self::solutions(part1, part2)
+    }
+
+    fn day9(input: Vec<String>) -> Answers {
+        let tiles: Vec<(u64, u64)> = input
+            .iter()
+            .map(|line| {
+                parse::uint::<u64>
+                    .pair(','.right(parse::uint::<u64>))
+                    .parse_exact(line)
+                    .unwrap()
+            })
+            .collect();
+
+        let pairs = (0..tiles.len()).flat_map(|i| ((i + 1)..tiles.len()).map(move |j| (i, j)));
+        let areas = pairs.map(|(i, j)| {
+            let left = tiles[i].0.min(tiles[j].0);
+            let right = tiles[i].0.max(tiles[j].0);
+            let top = tiles[i].1.min(tiles[j].1);
+            let bottom = tiles[i].1.max(tiles[j].1);
+            (right - left + 1) * (bottom - top + 1)
+        });
+
+        let part1 = areas.max().unwrap();
+        Self::part1(part1)
+    }
+
     fn day10(input: Vec<String>) -> Answers {
         let indicators = parse::surround(
             '[',
