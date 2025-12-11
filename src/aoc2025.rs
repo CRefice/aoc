@@ -233,53 +233,52 @@ impl aoc::solutions::Solutions for Solutions {
     }
 
     fn day6(input: Vec<String>) -> Answers {
-        enum Op {
-            Mul,
-            Add,
-        }
-
-        impl Op {
-            fn parse(s: &str) -> Self {
-                match s {
-                    "*" => Self::Mul,
-                    "+" => Self::Add,
-                    x => unreachable!("unexpected operation: {}", x),
-                }
-            }
-
-            fn apply(&self, x: u64, y: u64) -> u64 {
-                match self {
-                    Op::Mul => x * y,
-                    Op::Add => x + y,
-                }
-            }
-        }
-
-        fn reduce_all(inputs: impl Iterator<Item = Vec<u64>>, ops: &[Op]) -> Vec<u64> {
-            inputs
-                .reduce(|mut x: Vec<u64>, y| {
-                    for ((x, y), op) in x.iter_mut().zip(y).zip(ops.iter()) {
-                        *x = op.apply(*x, y);
-                    }
-                    x
-                })
-                .unwrap()
-        }
-
         let (ops, input) = input.split_last().unwrap();
-        let ops = ops.split_whitespace().map(Op::parse).collect::<Vec<_>>();
-        let input = input.iter().map(|line| {
-            line.split_whitespace()
-                .map(|s| s.parse::<u64>().unwrap())
-                .collect()
-        });
+        let split_points: Vec<usize> = ops
+            .match_indices(['+', '*'])
+            .map(|m| m.0)
+            .chain(std::iter::once(ops.len() + 1))
+            .collect();
 
-        let part1 = reduce_all(input, &ops).into_iter().sum::<u64>();
+        let ranges = split_points
+            .iter()
+            .zip(&split_points[1..])
+            .map(|(&start, &end)| start..(end - 1)); // -1 because whitespace separator
 
-        Self::part1(part1)
-        // let part2 = reduce_all(part2_input, &ops).into_iter().sum::<u64>();
+        fn apply(c: char) -> impl Fn(u64, u64) -> u64 {
+            match c {
+                '+' => |x, y| x + y,
+                '*' => |x, y| x * y,
+                _ => unreachable!(),
+            }
+        }
 
-        // Self::solutions(part1, part2)
+        let mut part1 = 0;
+        for range in ranges.clone() {
+            let op: char = ops.chars().nth(range.start).unwrap();
+            let column = input
+                .iter()
+                .map(|line| line[range.clone()].trim().parse::<u64>().unwrap());
+            part1 += column.reduce(apply(op)).unwrap();
+        }
+
+        let mut part2 = 0;
+        for range in ranges {
+            let op: char = ops.chars().nth(range.start).unwrap();
+
+            let columns = range.map(|i| {
+                input
+                    .iter()
+                    .map(|line| line.chars().nth(i).unwrap())
+                    .filter(|c| !c.is_ascii_whitespace())
+                    .collect::<String>()
+                    .parse::<u64>()
+                    .unwrap()
+            });
+
+            part2 += columns.reduce(apply(op)).unwrap();
+        }
+        Self::solutions(part1, part2)
     }
 
     fn day7(input: Vec<String>) -> Answers {
