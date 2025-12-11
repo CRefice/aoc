@@ -312,4 +312,51 @@ impl aoc::solutions::Solutions for Solutions {
 
         Self::part1(total)
     }
+
+    fn day11(input: Vec<String>) -> Answers {
+        let parser = parse::word
+            .left(": ")
+            .pair(parse::word.interspersed(parse::whitespace));
+
+        let paths: HashMap<&str, Vec<&str>> = input
+            .iter()
+            .map(|line| parser.parse_exact(line).unwrap())
+            .collect();
+
+        fn num_paths(paths: &HashMap<&str, Vec<&str>>, from: &str, to: &str) -> usize {
+            fn num_paths_memo<'a>(
+                paths: &HashMap<&str, Vec<&'a str>>,
+                from: &'a str,
+                to: &str,
+                memo: &mut HashMap<&'a str, usize>,
+            ) -> usize {
+                if from == to {
+                    return 1;
+                }
+                let Some(neighbors) = paths.get(from) else {
+                    return 0;
+                };
+                if let Some(ans) = memo.get(from) {
+                    return *ans;
+                }
+                let ans = neighbors
+                    .iter()
+                    .map(|node| num_paths_memo(paths, node, to, memo))
+                    .sum();
+                memo.insert(from, ans);
+                ans
+            }
+
+            num_paths_memo(paths, from, to, &mut HashMap::new())
+        }
+
+        let part1 = num_paths(&paths, "you", "out");
+        let part2 = (num_paths(&paths, "svr", "dac")
+            * num_paths(&paths, "dac", "fft")
+            * num_paths(&paths, "fft", "out"))
+            + (num_paths(&paths, "svr", "fft")
+                * num_paths(&paths, "fft", "dac")
+                * num_paths(&paths, "dac", "out"));
+        Self::solutions(part1, part2)
+    }
 }
