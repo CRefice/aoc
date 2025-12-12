@@ -588,4 +588,21 @@ impl aoc::solutions::Solutions for Solutions {
                 * num_paths(&paths, "dac", "out"));
         Self::solutions(part1, part2)
     }
+
+    fn day12(input: Vec<String>) -> Answers {
+        let mut parts = input.split(String::is_empty);
+        let regions = parts.nth(6).unwrap();
+
+        let area = parse::uint::<u64>.left('x').pair(parse::uint::<u64>);
+        let presents = parse::uint::<u64>.interspersed(parse::whitespace);
+
+        let region = area.left(": ").pair(presents);
+
+        let regions = regions.iter().map(|line| region.parse_exact(line).unwrap());
+        Self::part1(
+            regions
+                .filter(|((w, h), presents)| w * h >= 9 * presents.iter().sum::<u64>())
+                .count(),
+        )
+    }
 }
