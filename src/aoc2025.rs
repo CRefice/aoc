@@ -449,16 +449,42 @@ impl aoc::solutions::Solutions for Solutions {
             .collect();
 
         let pairs = (0..tiles.len()).flat_map(|i| ((i + 1)..tiles.len()).map(move |j| (i, j)));
-        let areas = pairs.map(|(i, j)| {
+        let rectangles = pairs.clone().map(|(i, j)| {
             let left = tiles[i].0.min(tiles[j].0);
             let right = tiles[i].0.max(tiles[j].0);
             let top = tiles[i].1.min(tiles[j].1);
             let bottom = tiles[i].1.max(tiles[j].1);
-            (right - left + 1) * (bottom - top + 1)
+            (left, right, top, bottom)
         });
 
-        let part1 = areas.max().unwrap();
-        Self::part1(part1)
+        let area = |(left, right, top, bottom)| (right - left + 1) * (bottom - top + 1);
+
+        let part1 = rectangles.clone().map(area).max().unwrap();
+
+        let edges = tiles.iter().zip(tiles.iter().cycle().skip(1));
+        let part2 = rectangles
+            .filter(|(left, right, top, bottom)| {
+                edges.clone().all(|((ax, ay), (bx, by))| {
+                    if ax == bx {
+                        // horiz edge
+                        ay >= bottom
+                            || ay <= top
+                            || (ax <= left && bx <= left)
+                            || (ax >= right && bx >= right)
+                    } else {
+                        // vertical edge
+                        ax >= right
+                            || ax <= left
+                            || (ay <= left && by <= left)
+                            || (ay >= right && by >= right)
+                    }
+                })
+            })
+            .map(area)
+            .max()
+            .unwrap();
+
+        Self::solutions(part1, part2)
     }
 
     fn day10(input: Vec<String>) -> Answers {
@@ -487,59 +513,102 @@ impl aoc::solutions::Solutions for Solutions {
         )
         .interspersed(parse::whitespace);
 
-        let parser = indicators.pair(parse::whitespace.right(buttons));
+        let joltages = parse::surround('{', parse::uint::<u64>.interspersed(','), '}');
 
-        fn min_presses(
-            state: u64,
-            target: u64,
-            buttons: &[u64],
-            pressed: &mut HashSet<u64>,
-            memo: &mut HashMap<u64, usize>,
+        let parser = indicators
+            .pair(parse::whitespace.right(buttons))
+            .pair(parse::whitespace.right(joltages));
+
+        fn precompute_combinations(buttons: &[u64]) -> HashMap<u64, Vec<Vec<u64>>> {
+            fn rec(
+                state: u64,
+                buttons: &[u64],
+                pressed: &mut Vec<u64>,
+                out: &mut HashMap<u64, Vec<Vec<u64>>>,
+            ) {
+                let Some((button, buttons)) = buttons.split_first() else {
+                    out.entry(state).or_default().push(pressed.clone());
+                    return;
+                };
+
+                // First recurse without pressing button
+                rec(state, buttons, pressed, out);
+
+                // Then with pressing
+                let state = state ^ button;
+                pressed.push(*button);
+                rec(state, buttons, pressed, out);
+                pressed.pop();
+            }
+
+            let mut out = HashMap::new();
+            rec(0, buttons, &mut Vec::new(), &mut out);
+            out
+        }
+
+        struct BitIndexIter(u64);
+
+        impl Iterator for BitIndexIter {
+            type Item = usize;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                if self.0 == 0 {
+                    None
+                } else {
+                    let idx = self.0.trailing_zeros();
+                    self.0 &= self.0.wrapping_sub(1);
+                    Some(idx.try_into().unwrap())
+                }
+            }
+        }
+
+        fn min_presses_to_reach(
+            joltages: Vec<u64>,
+            combinations: &HashMap<u64, Vec<Vec<u64>>>,
         ) -> Option<usize> {
-            if state == target {
+            if joltages.iter().all(|&x| x == 0) {
                 return Some(0);
-            } else if buttons.is_empty() {
-                return None;
             }
-            if let Some(answer) = memo.get(&state) {
-                return Some(*answer);
-            }
-            let answer = buttons
+
+            let diff = joltages
                 .iter()
-                .copied()
-                .filter_map(|button| {
-                    if !pressed.insert(button) {
-                        return None;
-                    }
-                    let state = state ^ button;
-                    let answer = min_presses(state, target, buttons, pressed, memo);
-                    pressed.remove(&button);
-                    answer
+                .enumerate()
+                .map(|(i, x)| {
+                    let bit = (!x.is_multiple_of(2)) as u64;
+                    bit << i
                 })
-                .min()?
-                .saturating_add(1);
-            memo.insert(state, answer);
-            eprintln!("{state} -> [{pressed:?}] = {answer:?}");
-            Some(answer)
+                .fold(0, |x, y| x | y);
+
+            combinations
+                .get(&diff)?
+                .iter()
+                .filter_map(|combo| {
+                    let mut joltages = joltages.clone();
+                    for button in combo {
+                        for idx in BitIndexIter(*button) {
+                            joltages[idx] = joltages[idx].checked_sub(1)?;
+                        }
+                    }
+                    for j in joltages.iter() {
+                        debug_assert!(j.is_multiple_of(2))
+                    }
+                    joltages.iter_mut().for_each(|x| *x /= 2);
+                    min_presses_to_reach(joltages, combinations).map(|x| 2 * x + combo.len())
+                })
+                .min()
         }
 
-        let mut total = 0;
+        let mut part1 = 0;
+        let mut part2 = 0;
         for line in input.iter() {
-            let mut memo = HashMap::new();
-            let (indicators, buttons) = parser.pars(line).unwrap().0;
+            let ((indicators, buttons), joltages) = parser.parse_exact(line).unwrap();
 
-            dbg!(&buttons);
-            total += dbg!(min_presses(
-                0,
-                indicators,
-                &buttons,
-                &mut HashSet::new(),
-                &mut memo
-            ))
-            .unwrap();
+            let combos = precompute_combinations(&buttons);
+            part1 += combos[&indicators].iter().map(|x| x.len()).min().unwrap();
+            part2 += min_presses_to_reach(joltages, &combos).unwrap();
         }
 
-        Self::part1(total)
+        Self::solutions(part1, part2)
     }
 
     fn day11(input: Vec<String>) -> Answers {
