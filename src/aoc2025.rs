@@ -465,19 +465,10 @@ impl aoc::solutions::Solutions for Solutions {
         let part2 = rectangles
             .filter(|(left, right, top, bottom)| {
                 edges.clone().all(|((ax, ay), (bx, by))| {
-                    if ax == bx {
-                        // horiz edge
-                        (ay >= bottom && by >= bottom)
-                            || (ay <= top && by <= top)
-                            || (ax <= left && bx <= left)
-                            || (ax >= right && bx >= right)
-                    } else {
-                        // vertical edge
-                        (ax >= right && bx >= right)
-                            || (ax <= left && bx <= left)
-                            || (ay <= top && by <= top)
-                            || (ay >= bottom && by >= bottom)
-                    }
+                    (ay >= bottom && by >= bottom)
+                        || (ay <= top && by <= top)
+                        || (ax <= left && bx <= left)
+                        || (ax >= right && bx >= right)
                 })
             })
             .map(area)
