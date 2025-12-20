@@ -467,16 +467,16 @@ impl aoc::solutions::Solutions for Solutions {
                 edges.clone().all(|((ax, ay), (bx, by))| {
                     if ax == bx {
                         // horiz edge
-                        ay >= bottom
-                            || ay <= top
+                        (ay >= bottom && by >= bottom)
+                            || (ay <= top && by <= top)
                             || (ax <= left && bx <= left)
                             || (ax >= right && bx >= right)
                     } else {
                         // vertical edge
-                        ax >= right
-                            || ax <= left
-                            || (ay <= left && by <= left)
-                            || (ay >= right && by >= right)
+                        (ax >= right && bx >= right)
+                            || (ax <= left && bx <= left)
+                            || (ay <= top && by <= top)
+                            || (ay >= bottom && by >= bottom)
                     }
                 })
             })
